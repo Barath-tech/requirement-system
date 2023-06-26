@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Purchase Requisition Lines</title>
+  <style>
+    body {
+      background-color: #f2f2f2;
+      overflow-x: hidden;
+      color: black;
+    }
+
+    h2 {
+      text-align: center;
+      padding: 1.5%;
+      text-shadow: black;
+    }
+
+    table {
+      width: 96%;
+      margin: 0 auto;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: white;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      width: 80px;
+      text-align: center;
+    }
+
+    input[type="text"][readonly] {
+      background-color: white;
+      text-align: center;
+    }
+
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      padding: 1%;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #notification {
+      display: none;
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #addLinesButton {
+      margin-top: 20px;
+      margin-left: 25px;
+    }
+
+    #resetButton {
+      margin-top: 20px;
+      margin-left: 20px;
+    }
+
+    td:first-child {
+      width: 10%;
+    }
+
+    td:nth-child(2) {
+      width: 30%;
+    }
+
+    td:nth-child(3),
+    td:nth-child(4),
+    td:nth-child(5) {
+      width: 20%;
+    }
+
+    td:last-child {
+      width: 10%;
+    }
+
+    td input[type="text"],
+    td input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .delete-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .delete-button button {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      cursor: pointer;
+      padding: 8px 16px;
+    }
+
+    .delete-button button:hover {
+      background-color: #d32f2f;
+    }
+
+    .delete-button button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  {% block content %}
+    <h2>Purchase Requisition Lines</h2>
+    <form method="post" action="{% url 'add_lines' %}">
+      {% csrf_token %}
+      <table id="requisitionLinesTable">
+        <thead>
+          <tr>
+            <th>S.No.</th>
+            <th>Product</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Existing rows will be added dynamically -->
+        </tbody>
+      </table>
+      <center><button type="button" onclick="addRow()">Add Row</button>
+      <br><br>
+      <input type="submit" value="Save" onclick="saveData(event)">
+
+    </center>
+    </form>
+
+  <script>
+    var rowId = 0; // Counter for generating unique row IDs
+
+    // Function to add a new row to the requisition lines table
+    function addRow() {
+        var tableBody = document.getElementById('requisitionLinesTable').getElementsByTagName('tbody')[0];
+        var newRow = tableBody.insertRow();
+
+        var snoCell = newRow.insertCell();
+        snoCell.textContent = ++rowId;
+
+        var productCell = newRow.insertCell();
+        var productSelect = document.createElement('select');
+        productSelect.name = 'product' + rowId;
+        // Add options to the product select element
+        // You can modify this part to populate the options dynamically
+        var productOptions = ['Product 1', 'Product 2', 'Product 3'];
+        for (var i = 0; i < productOptions.length; i++) {
+          var option = document.createElement('option');
+          option.value = productOptions[i];
+          option.textContent = productOptions[i];
+          productSelect.appendChild(option);
+        }
+        productSelect.onchange = updatePriceAndTotal;
+        productCell.appendChild(productSelect);
+
+        var unitPriceCell = newRow.insertCell();
+        var unitPriceInput = document.createElement('input');
+        unitPriceInput.type = 'text';
+        unitPriceInput.name = 'unitPrice' + rowId;
+        unitPriceCell.appendChild(unitPriceInput);
+
+        var quantityCell = newRow.insertCell();
+        var quantityInput = document.createElement('input');
+        quantityInput.type = 'number';
+        quantityInput.name = 'quantity' + rowId;
+        quantityInput.min = '1';
+        quantityInput.oninput = updateTotal;
+        quantityCell.appendChild(quantityInput);
+
+        var totalCell = newRow.insertCell();
+        var totalInput = document.createElement('input');
+        totalInput.type = 'text';
+        totalInput.name = 'total' + rowId;
+        totalInput.readOnly = true;
+        totalCell.appendChild(totalInput);
+
+        var actionCell = newRow.insertCell();
+        var deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = 'delete-button';
+        deleteButton.onclick = function() {
+          deleteRowById(rowId);
+        };
+        actionCell.appendChild(deleteButton);
+      }
+
+    function saveData(event) {
+        event.preventDefault(); // Prevent the default form submission behavior
+
+        // Get the form data
+        var form = document.querySelector('form');
+        var formData = new FormData(form);
+
+        // Send an AJAX request to save the data
+        var xhr = new XMLHttpRequest();
+        var url= "{% url 'add_lines' %}";
+        xhr.open('POST', url );
+        xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+        // Data saved successfully, perform any desired actions
+          alert('Data saved successfully!');
+          } else {
+        // Error occurred while saving the data
+        alert('Error: Unable to save data.');
+        }
+      };
+      xhr.send(formData);
+      }
+
+      // ... (existing JavaScript code omitted for brevity) ...
+
+      // Function to update the price and total based on the selected product
+      function updatePriceAndTotal() {
+        var row = this.parentNode.parentNode;
+        var unitPriceInput = row.querySelector('input[name^="unitPrice"]');
+        var selectedProduct = this.value;
+        // Prompt the user to enter the unit price
+        var userInput = prompt('Enter the unit price for ' + selectedProduct);
+        // Convert the user input to a number
+        var unitPrice = parseFloat(userInput);
+
+        // Validate if the user entered a valid unit price
+        if (!isNaN(unitPrice) && unitPrice >= 0) {
+          unitPriceInput.value = unitPrice;
+        } else {
+          alert('Invalid unit price. Please enter a valid number.');
+          unitPriceInput.value = ''; // Clear the input field
+        }
+
+        updateTotal.call(row.querySelector('input[name^="quantity"]'));
+      }
+    // Function to update the total amount based on the unit price and quantity
+    function updateTotal() {
+      var row = this.parentNode.parentNode;
+      var unitPriceInput = row.querySelector('input[name^="unitPrice"]');
+      var quantityInput = this;
+      var totalInput = row.querySelector('input[name^="total"]');
+      var unitPrice = parseFloat(unitPriceInput.value) || 0;
+      var quantity = parseFloat(quantityInput.value) || 0;
+      var total = unitPrice * quantity;
+      totalInput.value = total.toFixed(2);
+    }
+
+    // Function to reset the form fields
+    function resetFields() {
+      document.getElementById('requisitionLinesTable').getElementsByTagName('tbody')[0].innerHTML = '';
+      rowId = 0;
+    }
+  </script>
+  {% endblock %}
+</body>
+</html>

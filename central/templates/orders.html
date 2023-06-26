@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Purchase Requisition Approval</title>
+  <style>
+    body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f2f2f2;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h2 {
+  margin-top: 20px;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+form label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+form input[type="text"],
+form input[type="date"] {
+  padding: 10px;
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+form button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+table th,
+table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+table th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+#requisitionDetails {
+  display: none;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+#requisitionDetails h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+#requisitionDetails textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#requisitionDetails button {
+  margin-top: 10px;
+}
+
+#notification {
+  display: none;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  text-align: center;
+  margin-top: 20px;
+  border-radius: 5px;
+}
+
+  </style>
+</head>
+<body>
+    <h1>Procurement System</h1>
+  
+    <h2>Search Requisitions</h2>
+    <form id="searchForm">
+      <label for="requestedBy">Requested By:</label>
+      <input type="text" id="requestedBy" placeholder="Enter requested by">
+  
+      <label for="requisitionNumber">Requisition Number:</label>
+      <input type="text" id="requisitionNumber" placeholder="Enter requisition number">
+  
+      <label for="requestedDate">Requested Date:</label>
+      <input type="date" id="requestedDate">
+  
+      <button type="submit">Search</button>
+    </form>
+  
+    <h2>Requisitions</h2>
+    <table id="requisitionsTable">
+      <thead>
+        <tr>
+          <th>Requisition Number</th>
+          <th>Requested By</th>
+          <th>Requested Date</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  
+    <h2>Requisition Details</h2>
+    <div id="requisitionDetails">
+      <h3>Product Details</h3>
+      <table id="productDetails">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+  
+      <label for="comments">Comments:</label>
+      <textarea id="comments" rows="4"></textarea>
+  
+      <button onclick="approveRequisition()">Approve</button>
+      <button onclick="rejectRequisition()">Reject</button>
+    </div>
+  
+    <div id="notification"></div>
+  
+    <script>
+      var requisitions = [];
+  
+      var searchForm = document.getElementById("searchForm");
+      var requisitionsTable = document.getElementById("requisitionsTable");
+      var productDetails = document.getElementById("productDetails");
+      var requisitionDetails = document.getElementById("requisitionDetails");
+      var commentsInput = document.getElementById("comments");
+      var notification = document.getElementById("notification");
+  
+      // Event listener for search form submission
+      searchForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        displayRequisitions();
+      });
+  
+      // Display list of requisitions based on search criteria
+      function displayRequisitions() {
+        var requestedBy = document.getElementById("requestedBy").value.trim();
+        var requisitionNumber = document.getElementById("requisitionNumber").value.trim();
+        var requestedDate = document.getElementById("requestedDate").value.trim();
+  
+        var filteredRequisitions = requisitions.filter(function(requisition) {
+          return (
+            (requestedBy === "" || requisition.requestedBy.toLowerCase().includes(requestedBy.toLowerCase())) &&
+            (requisitionNumber === "" || requisition.requisitionNumber.toLowerCase().includes(requisitionNumber.toLowerCase())) &&
+            (requestedDate === "" || requisition.requestedDate === requestedDate)
+          );
+        });
+  
+        clearRequisitionsTable();
+        clearProductDetails();
+  
+        if (filteredRequisitions.length > 0) {
+          filteredRequisitions.forEach(function(requisition) {
+            var row = document.createElement("tr");
+            row.innerHTML = "<td>" + requisition.requisitionNumber + "</td>" +
+                            "<td>" + requisition.requestedBy + "</td>" +
+                            "<td>" + requisition.requestedDate + "</td>";
+            row.addEventListener("click", function() {
+              displayRequisitionDetails(requisition);
+            });
+            requisitionsTable.querySelector("tbody").appendChild(row);
+          });
+        } else {
+          var row = document.createElement("tr");
+          row.innerHTML = "<td colspan='3'>No requisitions found.</td>";
+          requisitionsTable.querySelector("tbody").appendChild(row);
+        }
+      }
+  
+      // Display details of a selected requisition
+      function displayRequisitionDetails(requisition) {
+        var productRows = requisition.products.map(function(product) {
+          return "<tr>" +
+                    "<td>" + product.name + "</td>" +
+                    "<td>" + product.quantity + "</td>" +
+                    "<td>" + product.total + "</td>" +
+                 "</tr>";
+        }).join("");
+  
+        productDetails.querySelector("tbody").innerHTML = productRows;
+        commentsInput.value = requisition.comments;
+  
+        // Highlight the selected row
+        var rows = requisitionsTable.querySelectorAll("tr");
+        rows.forEach(function(row) {
+          row.classList.remove("selected");
+        });
+        this.classList.add("selected");
+  
+        requisitionDetails.style.display = "block";
+      }
+  
+      // Clear requisitions table
+      function clearRequisitionsTable() {
+        requisitionsTable.querySelector("tbody").innerHTML = "";
+      }
+  
+      // Clear product details
+      function clearProductDetails() {
+        productDetails.querySelector("tbody").innerHTML = "";
+        commentsInput.value = "";
+        requisitionDetails.style.display = "none";
+      }
+  
+      // Approve requisition
+      function approveRequisition() {
+        // Implement your approval logic here
+        var selectedRequisition = getSelectedRequisition();
+  
+        if (selectedRequisition) {
+          displayNotification("Purchase Requisition Approved successfully");
+        }
+      }
+  
+      // Reject requisition
+      function rejectRequisition() {
+        // Implement your rejection logic here
+        var selectedRequisition = getSelectedRequisition();
+  
+        if (selectedRequisition) {
+          displayNotification("Purchase Requisition Rejected successfully");
+        }
+      }
+  
+      // Get the selected requisition from the table
+      function getSelectedRequisition() {
+        var selectedRow = requisitionsTable.querySelector("tr.selected");
+  
+        if (selectedRow) {
+          var requisitionNumber = selectedRow.cells[0].textContent;
+          return requisitions.find(function(requisition) {
+            return requisition.requisitionNumber === requisitionNumber;
+          });
+        }
+  
+        return null;
+      }
+  
+      // Display notification message
+      function displayNotification(message) {
+        notification.textContent = message;
+        notification.style.display = "block";
+  
+        setTimeout(function() {
+          notification.style.display = "none";
+        }, 3000);
+      }
+    </script>
+  </body>
+  </html>
+  

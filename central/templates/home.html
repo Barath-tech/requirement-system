@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home Page</title>
+  <style>
+    /* CSS for the navigation bar */
+    body{
+        background-image: url("https://cutewallpaper.org/21/rose-gold-hd/Rose-Gold-Desktop-Wallpapers-Top-Free-Rose-Gold-Desktop-.jpg");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+        overflow-x: hidden;
+        color: black;
+    }
+    .navbar {
+      background-color: transparent;
+      padding: 10px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .navbar a {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    /* CSS for the form */
+    .form-container {
+      margin: 50px auto;
+      width: 500px;
+      padding: 20px;
+      background-color: #f2f2f2;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="submit"],
+    input[type="reset"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+
+    /* CSS for the submit and reset buttons */
+    input[type="submit"],
+    input[type="reset"],
+    #saveButton {
+      background-color: #4CAF50;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover,
+    input[type="reset"]:hover,
+    #saveButton:hover {
+      background-color: #45a049;
+    }
+
+    /* CSS for the submission result container */
+    #submissionResult {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Create Purchase Requisition</h2>
+    <form id="purchaseRequisitionForm" method="POST" action="{% url 'create_requisition' %}">
+      {% csrf_token %}
+      <label for="requestedBy">Requested By:</label>
+      <input type="text" id="requestedBy" name="requestedBy" value="{{ request.user.username }}" readonly>
+
+
+      <label for="requestedDate">Requested Date:</label>
+      <input type="date" id="requestedDate" name="requestedDate" required>
+
+      <label for="expectedDate">Expected Date:</label>
+      <input type="date" id="expectedDate" name="expectedDate" required>
+
+      <label for="managerName">Manager Name:</label>
+      <input type="text" id="managerName" name="managerName" required>
+
+      <label for="vendorName">Vendor Name:</label>
+      <input type="text" id="vendorName" name="vendorName" required>
+
+      <label for="status">Status:</label>
+      <input type="text" id="status" name="status" value="Draft" readonly>
+
+      <div class="submit_btn">
+        <input class="form-control"type="submit" name="save" value="submit">
+      </div>
+      <input type="reset" value="Clear">
+    </form>
+
+    <div id="submissionResult" style="display: none;">
+      <p>Requisition Created Successfully!</p>
+      <p id="requisitionId"></p>
+      <button onclick="window.location.href='purchaseorder'">Go to Purchase Order</button>
+    </div>
+  </div>
+
+  <script>
+   
+    // JavaScript code for date picker, autofilling requested date, and generating requisition ID
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById('requestedDate').setAttribute('min', today);
+
+    // Autofill requested date on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      var requestedDateField = document.getElementById('requestedDate');
+      requestedDateField.value = today;
+    });
+
+    // Generate requisition ID and display after form submission
+    document.getElementById('purchaseRequisitionForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent form submission
+
+      var userId = document.getElementById('requestedBy').value;
+      var dateTime = new Date().toISOString().replace(/[-:.]/g, ''); // Remove special characters from datetime
+      var requisitionId = 'REQ-' + userId + '-' + dateTime;
+
+      document.getElementById('submissionResult').style.display = 'block';
+      document.getElementById('requisitionId').textContent = requisitionId;
+      document.getElementById('addLinesButton').style.display = 'block';
+    });
+
+    // Redirect to add lines page on button click
+    document.getElementById('addLinesButton').addEventListener('click', function() {
+      window.location.href = 'purchaseorder.html';
+    });
+
+    // Add event listeners for submit, and clear buttons
+    var submitButton = document.getElementById('submitButton');
+    var clearButton = document.getElementById('clearButton');
+
+    submitButton.addEventListener('click', function() {
+      alert('Details submitted!');
+    });
+
+    clearButton.addEventListener('click', function() {
+      alert('Form cleared!');
+    });
+
+     // Add event listener for form submission
+     document.getElementById('purchaseRequisitionForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent form submission
+
+    // Display requisition ID in submission result and show notification
+    var submissionResult = document.getElementById('submissionResult');
+      var requisitionIdElement = document.getElementById('requisitionId');
+      requisitionIdElement.textContent = requisitionId;
+      submissionResult.style.display = 'block';
+      alert('Requisition ID: ' + requisitionId);
+    });
+
+  </script>
+</body>
+</html>
