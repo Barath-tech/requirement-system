@@ -9,7 +9,7 @@ urlpatterns=[
     path('home/purchaseorder',views.nextpage,name='purchaseorder'),
     path('manager/', views.manager, name='manager'),
     path('create-requisition/', views.create_requisition, name='create_requisition'),
-    path('save-requisition/', views.save_requisition, name='save_requisition'),
+     path('generate-requisition-id/', views.generate_requisition_id, name='generate_requisition_id'),
      path('add-lines/', views.add_lines, name='add_lines'),
      path('nextpage/',views.nextpage,name='nextpage')
 
