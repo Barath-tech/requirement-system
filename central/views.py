@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import LoginForm, SignUpForm
 from django.contrib.auth import authenticate,login
-from .models import PurchaseRequisition,Requisition,PurchaseRequisitionLine
+from datetime import datetime
+from .models import PurchaseRequisition,PurchaseRequisitionLine
 
 
 def index(request):
@@ -47,31 +48,41 @@ def login_view(request):
     return render(request, 'login.html', {'form': form, 'msg': msg})
 
 def create_requisition(request):
-    n=''
     if request.method == 'POST':
         requested_by = request.POST.get('requestedBy')
         requested_date = request.POST.get('requestedDate')
         expected_date = request.POST.get('expectedDate')
         manager_name = request.POST.get('managerName')
         vendor_name = request.POST.get('vendorName')
-        #requisition_Id= request.POST.get('requsitionid')
+
+        requisition_id = generate_requisition_id(requested_by)  # Generate the requisition ID
+
         status = 'Draft'  # Assuming you want to set the status as 'Draft' by default
 
         requisition = PurchaseRequisition(
+            requisition_Id=requisition_id,  # Set the generated requisition ID
             requested_by=requested_by,
             requested_date=requested_date,
             expected_date=expected_date,
             manager_name=manager_name,
             vendor_name=vendor_name,
             status=status,
-            #requisition_Id=requisition_Id
         )
         requisition.save()
-        n='Data Inserted'
+
         # Optionally, you can redirect the user to a success page or perform other actions
-        return render(request, 'success.html')
+        return render(request, 'success.html', {'requisition_id': requisition_id})
 
     return render(request, 'home.html')
+
+def generate_requisition_id(requested_by):
+    # Generate the requisition ID based on your desired logic
+    # You can use the requested_by value or any other relevant information
+    # Implement your own logic here
+    # Example: concatenating a prefix, user ID, and timestamp
+    requisition_id = 'REQ-' + requested_by + '-' + datetime.now().strftime('%Y%m%d%H%M%S')
+    return requisition_id
+
 
 def customer(request):
     return render(request,"home.html")
@@ -80,25 +91,8 @@ def nextpage(request):
     return render(request,"purchaseorder.html")
 
 def manager(request):
-    return render(request,"orders.html")
+    return render(request,"managerview.html")
 
-def save_requisition(request):
-    if request.method == 'POST':
-        requisition_number = request.POST.get('requisitionNumber')
-        requested_by = request.POST.get('requestedBy')
-        requested_date = request.POST.get('requestedDate')
-        comments = request.POST.get('comments')
-
-        requisition = Requisition(
-            requisition_number=requisition_number,
-            requested_by=requested_by,
-            requested_date=requested_date,
-            comments=comments
-        )
-        requisition.save()
-        return redirect('success.html')  # Redirect to a success page or a different URL
-
-    return render(request, 'orders.html')  # Render the form template for GET requests
 
 def add_lines(request):
     if request.method == 'POST':
@@ -123,3 +117,9 @@ def add_lines(request):
 
     # Render the template
     return render(request, 'purchaseorder.html')
+
+def manager_view(request):
+    purchase_requisitions = PurchaseRequisition.objects.all()
+    add_lines = PurchaseRequisitionLine.objects.all()
+    context = {'purchase_requisitions': purchase_requisitions, 'add_lines': add_lines}
+    return render(request, 'managerview.html', context)
