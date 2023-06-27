@@ -62,7 +62,7 @@
       color: #fff;
       cursor: pointer;
     }
-
+   
     input[type="submit"]:hover,
     input[type="reset"]:hover,
     #saveButton:hover {
@@ -157,12 +157,30 @@
       alert('Form cleared!');
     });
 
-    document.getElementById('checkStatusButton').addEventListener('click', function() {
-      var requisitionId = document.getElementById('requisitionId').textContent;
-      // Perform the necessary action to check the status using the requisitionId
-      alert('Checking status for Requisition ID: ' + requisitionId);
-    });
+   // Function to update the status received from query parameters
+    function updateStatusFromQueryParams() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var status = urlParams.get('status');
+      if (status) {
+        var statusElement = document.getElementById('status');
+        statusElement.value = status;
+      }
+    }
 
+    // Call the function to update the status from the query parameters
+    updateStatusFromQueryParams();
+
+    // Function to update the status on "Check Status" button click
+    document.getElementById('checkStatusButton').addEventListener('click', function() {
+    var statusElement = document.getElementById('status');
+    var currentStatus = statusElement.value;
+
+    if (currentStatus) {
+        alert('Current Status: Request ' + currentStatus);
+      } else {
+        alert('Request Pending!!');
+      }
+    });
      // Add event listener for form submission
      document.getElementById('purchaseRequisitionForm').addEventListener('submit', function(event) {
       event.preventDefault(); // Prevent form submission
