@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager View</title>
+    <style>
+        /* Table styles */
+        #purchaseTable {
+          width: 100%;
+          border-collapse: collapse;
+        }
+      
+        #purchaseTable th,
+        #purchaseTable td {
+          padding: 8px;
+          text-align: left;
+          border-bottom: 1px solid #ddd;
+        }
+      
+        /* Nested table styles */
+        #purchaseTable table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+      
+        #purchaseTable table th,
+        #purchaseTable table td {
+          padding: 8px;
+          text-align: left;
+          border-bottom: 1px solid #ddd;
+        }
+      
+        /* Styling the checkbox and label */
+        #purchaseTable input[type="checkbox"] {
+          margin-right: 5px;
+        }
+      
+        #purchaseTable label {
+          font-weight: bold;
+        }
+      </style>
+</head>
+<body>
+    <table id="purchaseTable">
+        <thead>
+          <tr>
+            <th>S No</th>
+            <th>Requested By</th>
+            <th>Requested Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for requisition in purchase_requisitions %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ requisition.requested_by }}</td>
+              <td>{{ requisition.requested_date }}</td>
+              <td>
+                <input type="checkbox" id="checkbox{{ forloop.counter }}" onchange="updateStatus('{{ requisition.requisition_id }}', this)">
+                <label for="checkbox{{ forloop.counter }}">Pending</label>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="4">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Unit Price</th>
+                      <th>Quantity</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for line in add_lines.all %}
+                      <tr>
+                        <td>{{ line.product }}</td>
+                        <td>{{ line.unit_price }}</td>
+                        <td>{{ line.quantity }}</td>
+                        <td>{{ line.total }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+      <script>
+        function updateStatus(requisitionId, checkbox) {
+          var statusLabel = checkbox.nextSibling;
+          var status = checkbox.checked ? 'Accepted' : 'Declined';
+          statusLabel.textContent = status;
+      
+          // Send AJAX request to update the status in the database
+          // You can use the requisitionId to identify the record to update
+          // Example using jQuery AJAX:
+          $.ajax({
+            url: '/update_status/',
+            type: 'POST',
+            data: {
+              requisition_id: requisitionId,
+              status: status
+            },
+            success: function(response) {
+              console.log('Status updated successfully');
+            },
+            error: function(xhr, status, error) {
+              console.log('Error updating status:', error);
+            }
+          });
+        }
+      </script>
+      
+</body>
+</html>
