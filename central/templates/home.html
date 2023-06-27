@@ -110,6 +110,7 @@
     <div id="submissionResult" style="display: none;">
       <p>Requisition Created Successfully!</p>
       <p id="requisitionId"></p>
+      <button id="checkStatusButton">Check Status</button>
       <button onclick="window.location.href='purchaseorder'">Go to Purchase Order</button>
     </div>
   </div>
@@ -154,6 +155,12 @@
 
     clearButton.addEventListener('click', function() {
       alert('Form cleared!');
+    });
+
+    document.getElementById('checkStatusButton').addEventListener('click', function() {
+      var requisitionId = document.getElementById('requisitionId').textContent;
+      // Perform the necessary action to check the status using the requisitionId
+      alert('Checking status for Requisition ID: ' + requisitionId);
     });
 
      // Add event listener for form submission
