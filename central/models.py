@@ -18,18 +18,7 @@ class PurchaseRequisition(models.Model):
     manager_name = models.CharField(max_length=255)
     vendor_name = models.CharField(max_length=255)
     status = models.CharField(max_length=255, default='Draft')
-    #requisition_Id = models.CharField(max_length=255, unique=True, null=True)
-
-
-class Requisition(models.Model):
-    requisition_number = models.CharField(max_length=50)
-    requested_by = models.CharField(max_length=100)
-    requested_date = models.DateField()
-    comments = models.TextField()
-
-
-    def __str__(self):
-        return self.requisition_number
+    requisition_Id = models.CharField(max_length=255, unique=True, null=True)
     
 class PurchaseRequisitionLine(models.Model):
     product = models.CharField(max_length=100)
