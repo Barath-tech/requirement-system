@@ -4,6 +4,7 @@ from .forms import LoginForm, SignUpForm
 from django.contrib.auth import authenticate,login
 from datetime import datetime
 from .models import PurchaseRequisition,PurchaseRequisitionLine
+from django.http import JsonResponse
 
 
 def index(request):
@@ -40,7 +41,7 @@ def login_view(request):
                 return redirect('customer')
             elif user is not None and user.is_manager:
                 login(request, user)
-                return redirect('manager')
+                return redirect('managerview')
             else:
                 msg= 'invalid credentials'
         else:
@@ -71,8 +72,7 @@ def create_requisition(request):
         #To save the entered data into the database
         requisition.save()
 
-        # Optionally, you can redirect the user to a success page or perform other actions
-        return render(request, 'purchaseorder.html',{'requisition_id': requisition_id})
+        return render(request, 'purchase.html',{'requisition_id': requisition_id})
 
     return render(request, 'home.html')
 
@@ -89,38 +89,62 @@ def customer(request):
     return render(request,"home.html")
 
 def nextpage(request):
-    return render(request,"purchaseorder.html")
+    return render(request,"purchase.html")
 
 def manager(request):
-    return render(request,"managerview.html")
+    return redirect(request,"managerview")
 
 
 def add_lines(request):
     if request.method == 'POST':
-        # Process the form submission and save the data to the database
-        product_list = request.POST.getlist('product')
-        unit_price_list = request.POST.getlist('unitPrice')
-        quantity_list = request.POST.getlist('quantity')
-        total_list = request.POST.getlist('total')
+        products = request.POST.getlist('product[]')
+        unit_prices = request.POST.getlist('unit_price[]')
+        quantities = request.POST.getlist('quantity[]')
 
-        # Save the form data to the database
-        for i in range(len(product_list)):
-            product = product_list[i]
-            unit_price = float(unit_price_list[i])
-            quantity = int(quantity_list[i])
-            total = float(total_list[i])
-            line = PurchaseRequisitionLine(product=product, unit_price=unit_price, quantity=quantity, total=total)
-            line.save()
-            
+        if all(products) and all(unit_prices) and all(quantities):
+        # Iterate over the submitted data and save each product to the database
+            for product, unit_price, quantity in zip(products, unit_prices, quantities):
+                total = float(unit_price) * float(quantity)
+                PurchaseRequisitionLine.objects.create(product=product, unit_price=unit_price, quantity=quantity, total=total)
+            success_message = "Data saved successfully."
+        else:
+            success_message = "Please fill in all inputs before saving."
 
-        # Redirect or show a success message
-        # ...
+        products = PurchaseRequisitionLine.objects.all()
+        return render(request, 'index.html', {'products': products, 'success_message': success_message})
+        # Save the data to the database
+        #Product=PurchaseRequisitionLine(product=product, unit_price=unit_price, quantity=quantity, total=total)
 
-    # Render the template
-    return render(request, 'purchaseorder.html')
-
+        #Product.save()
+        
+        # Redirect to a success page or render a success message
+        #return render(request,'purchase.html')  
+    else:
+        products = PurchaseRequisitionLine.objects.all()
+        return render(request, 'purchase.html', {'products': products,'success_message': ''})
+ 
 def manager_view(request):
     purchase_requisitions = PurchaseRequisition.objects.all()
     add_lines = PurchaseRequisitionLine.objects.all()
     context = {'purchase_requisitions': purchase_requisitions, 'add_lines': add_lines}
     return render(request, 'managerview.html', context)
+
+def update_status(request):
+    if request.method == 'POST':
+        requisition_id = request.POST.get('requisition_id')
+        status = request.POST.get('status')
+        
+        # Update the status in the database for the given requisition_id
+        
+        # Return a JSON response indicating the success status
+        response = {'message': 'Status updated successfully'}
+        return JsonResponse(response)
+    else:
+        # If the request method is not POST, return an error response
+        response = {'error': 'Invalid request method'}
+        return JsonResponse(response, status=400)
+    
+def check_status(request):
+    # Retrieve the requisition status from the database 
+    # Prepare the data and render the appropriate template
+    return render(request, 'check_status.html')
