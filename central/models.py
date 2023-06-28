@@ -19,9 +19,12 @@ class PurchaseRequisition(models.Model):
     vendor_name = models.CharField(max_length=255)
     status = models.CharField(max_length=255, default='Draft')
     requisition_Id = models.CharField(max_length=255, unique=True, null=True)
+
     
 class PurchaseRequisitionLine(models.Model):
     product = models.CharField(max_length=100)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
     total = models.DecimalField(max_digits=10, decimal_places=2)
+    requisition = models.ForeignKey(PurchaseRequisition, on_delete=models.CASCADE, default=None,null=True,related_name='lines')
+
