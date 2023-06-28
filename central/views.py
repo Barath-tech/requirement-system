@@ -59,19 +59,20 @@ def create_requisition(request):
 
         status = 'Draft'  # Assuming you want to set the status as 'Draft' by default
 
-        requisition = PurchaseRequisition(
-            requisition_Id=requisition_id,  # Set the generated requisition ID
-            requested_by=requested_by,
-            requested_date=requested_date,
-            expected_date=expected_date,
-            manager_name=manager_name,
-            vendor_name=vendor_name,
-            status=status,
-        )
+        requisition = PurchaseRequisition()
+        requisition.requisition_Id=requisition_id  # Set the generated requisition ID
+        requisition.requested_by=requested_by
+        requisition.requested_date=requested_date
+        requisition.expected_date=expected_date
+        requisition.manager_name=manager_name
+        requisition.vendor_name=vendor_name
+        requisition.status=status
+        
+        #To save the entered data into the database
         requisition.save()
 
         # Optionally, you can redirect the user to a success page or perform other actions
-        return render(request, 'success.html', {'requisition_id': requisition_id})
+        return render(request, 'purchaseorder.html',{'requisition_id': requisition_id})
 
     return render(request, 'home.html')
 
