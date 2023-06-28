@@ -77,32 +77,34 @@
   </style>
 </head>
 <body>
-
+  
   <div class="form-container">
     <h2>Create Purchase Requisition</h2>
     <form id="purchaseRequisitionForm" method="POST" action="{% url 'create_requisition' %}">
       {% csrf_token %}
       <label for="requestedBy">Requested By:</label>
-      <input type="text" id="requestedBy" name="requestedBy" value="{{ request.user.username }}" readonly>
+      <input type="text" class="form-control" id="requestedBy" name="requestedBy" value="{{ request.user.username }}" readonly>
 
 
       <label for="requestedDate">Requested Date:</label>
-      <input type="date" id="requestedDate" name="requestedDate" required>
+      <input type="date" class="form-control" id="requestedDate" name="requestedDate" required>
 
       <label for="expectedDate">Expected Date:</label>
-      <input type="date" id="expectedDate" name="expectedDate" required>
+      <input type="date" class="form-control" id="expectedDate" name="expectedDate" required>
 
       <label for="managerName">Manager Name:</label>
-      <input type="text" id="managerName" name="managerName" required>
+      <input type="text" class="form-control" id="managerName" name="managerName" required>
 
       <label for="vendorName">Vendor Name:</label>
-      <input type="text" id="vendorName" name="vendorName" required>
+      <input type="text" class="form-control" id="vendorName" name="vendorName" required>
 
       <label for="status">Status:</label>
-      <input type="text" id="status" name="status" value="Draft" readonly>
+      <input type="text" class="form-control" id="status" name="status" value="Draft" readonly>
+
+      
 
       <div class="submit_btn">
-        <input class="form-control"type="submit" name="save" value="submit">
+        <input class="form-control"type="submit" name="save" value="submit "  onclick="showAlertAndNavigate(event)" >
       </div>
       <input type="reset" value="Clear">
     </form>
@@ -115,10 +117,10 @@
     </div>
   </div>
 
-  <script>
+ <script>
    
     // JavaScript code for date picker, autofilling requested date, and generating requisition ID
-    var today = new Date().toISOString().split('T')[0];
+   var today = new Date().toISOString().split('T')[0];
     document.getElementById('requestedDate').setAttribute('min', today);
 
     // Autofill requested date on page load
@@ -127,8 +129,22 @@
       requestedDateField.value = today;
     });
 
+    function showAlertAndNavigate(event) {
+       // Prevent form submission
+
+      var userId = document.getElementById('requestedBy').value;
+      var dateTime = new Date().toISOString().replace(/[-:.]/g, ''); // Remove special characters from datetime
+      var requisitionId = 'REQ-' + userId + '-' + dateTime;
+
+      // Display alert message with requisition ID
+      alert('Requisition ID: ' + requisitionId);
+
+      // Navigate to the next window or URL
+      window.location.href = 'purchaseorder'; 
+    }
+
     // Generate requisition ID and display after form submission
-    document.getElementById('purchaseRequisitionForm').addEventListener('submit', function(event) {
+    /*document.getElementById('purchaseRequisitionForm').addEventListener('submit', function(event) {
       event.preventDefault(); // Prevent form submission
 
       var userId = document.getElementById('requestedBy').value;
@@ -138,7 +154,7 @@
       document.getElementById('submissionResult').style.display = 'block';
       document.getElementById('requisitionId').textContent = requisitionId;
       document.getElementById('addLinesButton').style.display = 'block';
-    });
+    });*/
 
     // Redirect to add lines page on button click
     document.getElementById('addLinesButton').addEventListener('click', function() {
@@ -183,7 +199,7 @@
     });
      // Add event listener for form submission
      document.getElementById('purchaseRequisitionForm').addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent form submission
+     
 
     // Display requisition ID in submission result and show notification
     var submissionResult = document.getElementById('submissionResult');
@@ -193,6 +209,6 @@
       alert('Requisition ID: ' + requisitionId);
     });
 
-  </script>
+  </script>  
 </body>
 </html>
