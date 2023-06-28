@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Product Table</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css'%}">
+  <style>
+        body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      background-color: #fff;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f5f5f5;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+
+    .add-row-btn {
+      margin-bottom: 10px;
+    }
+
+    .save-btn {
+      padding: 10px 20px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .save-btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="page-header text primary text-center">Product Table</h1>
+  <form method="post" action="{% url 'add_lines' %}">
+    {% csrf_token %}
+    <table class="table table-bordered" id="product-table">
+        <tr>
+            <th>S.No</th>
+            <th>Product</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+        </tr>
+        {% for product in products %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td> <select name="product[]" required>
+                <option value="Product 1" {% if product.product == 'Product 1' %} selected {% endif %}>Product 1</option>
+                <option value="Product 2" {% if product.product == 'Product 2' %} selected {% endif %}>Product 2</option>
+                <option value="Product 3" {% if product.product == 'Product 3' %} selected {% endif %}>Product 3</option>
+            </select></td>
+            <td><input type="number" name="unit_price[]" value="{{ product.unit_price }}" required></td>
+            <td><input type="number" name="quantity[]" value="{{ product.quantity }}" required></td>
+            <td>{{ product.total }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button type="button" onclick="addRow()">Add Row</button>
+    <input type="submit" value="Save" onclick="showalertmessage(event)">
+</form>
+
+<script>
+    // JavaScript function to add a new row to the table
+    function addRow() {
+        var table = document.getElementById("product-table");
+        var rowCount = table.rows.length;
+        var row = table.insertRow(rowCount);
+
+        var cell1 = row.insertCell(0);
+        cell1.innerHTML = rowCount;
+
+        var cell2 = row.insertCell(1);
+        cell2.innerHTML = 
+                '<select name="product[]" required> <option value="Product 1">Product 1</option> <option value="Product 2">Product 2</option> <option value="Product 3">Product 3</option></select>';
+
+        var cell3 = row.insertCell(2);
+        cell3.innerHTML = '<input type="number" name="unit_price[]" required>';
+
+        var cell4 = row.insertCell(3);
+        cell4.innerHTML = '<input type="number" name="quantity[]" required>';
+
+        var cell5 = row.insertCell(4);
+        cell5.innerHTML = '';
+
+        // Update the row count for all existing rows
+        updateRowCounts();
+    }
+
+    // Function to update the S.No values of the rows
+    function updateRowCounts() {
+        var table = document.getElementById("product-table");
+        var rowCount = table.rows.length;
+        for (var i = 1; i < rowCount; i++) {
+            table.rows[i].cells[0].innerHTML = i;
+        }
+    }
+
+    function showalertmessage(event)
+    {
+        alert("The order has been successfully submitted!!\n You will be intimated about the status soon!!");
+        window.location.href="{% url 'login_view' %}";
+    }
+</script>
+</body>
+</html>
