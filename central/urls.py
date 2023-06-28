@@ -6,12 +6,13 @@ urlpatterns=[
     path('login/',views.login_view,name='login_view'),
     path('register',views.register,name='register'),
     path('home/', views.customer, name='customer'),
-    path('home/purchaseorder',views.nextpage,name='purchaseorder'),
-    path('manager/', views.manager, name='manager'),
+    path('home/purchase',views.nextpage,name='purchase'),
     path('create-requisition/', views.create_requisition, name='create_requisition'),
-     path('generate-requisition-id/', views.generate_requisition_id, name='generate_requisition_id'),
+    path('generate-requisition-id/', views.generate_requisition_id, name='generate_requisition_id'),
      path('add-lines/', views.add_lines, name='add_lines'),
-     path('nextpage/',views.nextpage,name='nextpage')
-
+     path('nextpage/',views.nextpage,name='nextpage'),
+     path('manager/',views.manager_view,name='managerview'),
+     path('update_status/', views.update_status, name='update_status'),
+      path('check-status/', views.check_status, name='check_status'),
 ]
 
