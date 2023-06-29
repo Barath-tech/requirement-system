@@ -11,20 +11,19 @@ class User(AbstractUser):
     is_manager=models.BooleanField('Is Manager', default=False)
 
 
-class PurchaseRequisition(models.Model):
+class PurchaseRequisitions(models.Model):
     requested_by = models.CharField(max_length=255)
     requested_date = models.DateField(default=timezone.now)
     expected_date = models.DateField()
     manager_name = models.CharField(max_length=255)
     vendor_name = models.CharField(max_length=255)
     status = models.CharField(max_length=255, default='Draft')
-    requisition_Id = models.CharField(max_length=255, unique=True, null=True)
+    requisition_id = models.CharField(max_length=255, unique=True, null=True)
 
     
-class PurchaseRequisitionLine(models.Model):
+class PurchaseRequisitionLines(models.Model):
     product = models.CharField(max_length=100)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
     total = models.DecimalField(max_digits=10, decimal_places=2)
-    requisition = models.ForeignKey(PurchaseRequisition, on_delete=models.CASCADE, default=None,null=True,related_name='lines')
 
