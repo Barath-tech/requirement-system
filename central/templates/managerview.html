@@ -43,7 +43,7 @@
         }
         #logout-btn {
           position: fixed;
-          top: 10px;
+          top: 0px;
           left: 10px;
           background-color: #333;
           color: #fff;
@@ -59,96 +59,71 @@
       </style>
 </head>
 <body>
-    <h3 class="page-header text primary text-center">View Requisitions</h3>
-    <table class="table table-bordered" id="purchaseTable">
-      <button id="logout_btn" onclick="alertmsg(event)">Logout</button>
-        <thead>
-          <tr>
-            <th>S No</th>
-            <th>Requisition ID</th>
-            <th>Requested By</th>
-            <th>Requested Date</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for requisition in purchase_requisitions %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ requisition.requsition_id }}</td>
-              <td>{{ requisition.requested_by }}</td>
-              <td>{{ requisition.requested_date }}</td>
-              <td>
-                <input type="checkbox" id="acceptedCheckbox{{ forloop.counter }}" onchange="updateStatus('{{ requisition.requisition_id }}', 'Accepted', this)">
-                <label for="acceptedCheckbox{{ forloop.counter }}">Accepted</label>
-                <br>
-                <input type="checkbox" id="declinedCheckbox{{ forloop.counter }}" onchange="updateStatus('{{ requisition.requisition_id }}', 'Declined', this)">
-                <label for="declinedCheckbox{{ forloop.counter }}">Declined</label>
-            </td>
-            </tr>
-            <tr>
-              <td colspan="4">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Product</th>
-                      <th>Unit Price</th>
-                      <th>Quantity</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for line in requisition.lines.all %}
-                      <tr>
-                        <td>{{ line.product }}</td>
-                        <td>{{ line.unit_price }}</td>
-                        <td>{{ line.quantity }}</td>
-                        <td>{{ line.total }}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    
-      <script  src="https://code.jquery.com/jquery-3.6.0.min.js">
-        function updateStatus(requisitionId, checkbox) {
-          var statusLabel = checkbox.nextSibling;
-          var status = checkbox.checked ? 'Accepted' : 'Declined';
-          statusLabel.textContent = status;
-          
-          window.location.href = 'home.html?status=' + encodeURIComponent(status);
-          // Send AJAX request to update the status in the database
-          // You can use the requisitionId to identify the record to update
-          // Example using jQuery AJAX:
-          $.ajax({
-            url: '/update_status/',
-            type: 'POST',
-            data: {
-              requisition_id: requisitionId,
-              status: status,
-              csrfmiddleware: '{{ csrf_token }}'
-            },
-            success: function(response) {
-              console.log('Status updated successfully');
-            },
-            error: function(xhr, status, error) {
-              console.log('Error updating status:', error);
-            }
-          });
+  <h3 class="page-header text primary text-center">View Requisitions</h3>
+  <table class="table table-bordered" id="purchaseTable">
+    <thead>
+      <tr>
+        <th>S No</th>
+        <th>Requested By</th>
+        <th>Requested Date</th>
+        <th>Expected Date</th>
+        <th>Requisition ID</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for requisition in purchase_requisitions %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ requisition.requested_by }}</td>
+        <td>{{ requisition.requested_date }}</td>
+        <td>{{ requisition.expected_date }}</td>
+        <td>{{ requisition.requisition_id }}</td>
+        <td>
+          <input type="checkbox" id="acceptedCheckbox{{ forloop.counter }}" onchange="updateStatus('{{ requisition.requisition_id }}', 'Accepted', this)">
+          <label for="acceptedCheckbox{{ forloop.counter }}">Accepted</label>
+          <br>
+          <input type="checkbox" id="declinedCheckbox{{ forloop.counter }}" onchange="updateStatus('{{ requisition.requisition_id }}', 'Declined', this)">
+          <label for="declinedCheckbox{{ forloop.counter }}">Declined</label>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <center><button type="submit" onclick="redirectToIndex()">Submit</button></center>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    function redirectToIndex() {
+      alert('Status updated successfully.');
+      window.location.href = "{% url 'index' %}";
+    }
+
+    function updateStatus(requisitionId, checkbox) {
+      var statusLabel = checkbox.nextSibling;
+      var status = checkbox.checked ? 'Accepted' : 'Declined';
+      statusLabel.textContent = status;
+
+      // Send AJAX request to update the status in the database
+      // You can use the requisitionId to identify the record to update
+      // Example using jQuery AJAX:
+      $.ajax({
+        url: '/update_status/',
+        type: 'POST',
+        data: {
+          requisition_id: requisitionId,
+          status: status,
+          csrfmiddleware: '{{ csrf_token }}'
+        },
+        success: function(response) {
+          console.log('Status updated successfully');
+        },
+        error: function(xhr, status, error) {
+          console.log('Error updating status:', error);
         }
-       
-          function alertmsg(event){
-            var confirmed = confirm('Are you sure you want to logout?');
-            if (confirmed)
-            {
-              window.location.href = '/';
-            }
-          }
-      </script>
-      
+      });
+    }
+  </script>
 </body>
 </html>
